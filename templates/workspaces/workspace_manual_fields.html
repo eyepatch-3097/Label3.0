@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Create Workspace – Manual Fields{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <h1 class="h4 mb-3">Define Fields Manually</h1>
+        <p class="text-muted mb-3">
+          You can define some label variables now (like SKU, Size, MRP, Image URL, etc.).
+          You may skip this and create the workspace directly.
+        </p>
+
+        <form method="post">
+          {% csrf_token %}
+
+          <div class="table-responsive mb-3">
+            <table class="table table-sm align-middle">
+              <thead>
+                <tr>
+                  <th>Field Name</th>
+                  <th>Field Type</th>
+                </tr>
+              </thead>
+              <tbody id="fields-body">
+                {% if existing_fields %}
+                  {% for f in existing_fields %}
+                    <tr>
+                      <td>
+                        <input type="text"
+                               name="field_name_{{ forloop.counter0 }}"
+                               class="form-control form-control-sm"
+                               value="{{ f.name }}">
+                      </td>
+                      <td>
+                        <select name="field_type_{{ forloop.counter0 }}"
+                                class="form-select form-select-sm">
+                          <option value="">--- Select type ---</option>
+                          {% for value, label in field_type_choices %}
+                            <option value="{{ value }}"
+                              {% if value == f.field_type %}selected{% endif %}>
+                              {{ label }}
+                            </option>
+                          {% endfor %}
+                        </select>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                {% else %}
+                  <!-- Start with a single empty row -->
+                  <tr>
+                    <td>
+                      <input type="text"
+                             name="field_name_0"
+                             class="form-control form-control-sm"
+                             placeholder="e.g. SKU">
+                    </td>
+                    <td>
+                      <select name="field_type_0" class="form-select form-select-sm">
+                        <option value="">--- Select type ---</option>
+                        {% for value, label in field_type_choices %}
+                          <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                      </select>
+                    </td>
+                  </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+
+          <button type="button" id="add-field-btn" class="btn btn-outline-secondary btn-sm mb-3">
+            + Add another field
+          </button>
+
+          <div class="d-flex justify-content-between">
+            <button type="submit" name="back" value="1" class="btn btn-link">← Back</button>
+
+            <div class="d-flex gap-2">
+              <button type="submit" name="action" value="skip" class="btn btn-outline-secondary">
+                Skip &amp; Create Workspace
+              </button>
+              <button type="submit" name="action" value="next" class="btn btn-primary">
+                Continue to Sample
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden prototype row for JS cloning -->
+<table style="display: none;">
+  <tbody>
+    <tr id="field-row-template">
+      <td>
+        <input type="text"
+               name="field_name___INDEX__"
+               class="form-control form-control-sm"
+               placeholder="e.g. SKU">
+      </td>
+      <td>
+        <select name="field_type___INDEX__" class="form-select form-select-sm">
+          <option value="">--- Select type ---</option>
+          {% for value, label in field_type_choices %}
+            <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const body = document.getElementById('fields-body');
+  const addBtn = document.getElementById('add-field-btn');
+  const templateRow = document.getElementById('field-row-template');
+
+  if (!body || !addBtn || !templateRow) return;
+
+  // Determine starting index based on existing rows
+  let nextIndex = body.querySelectorAll('tr').length;
+  if (nextIndex === 0) {
+    nextIndex = 1;
+  }
+
+  addBtn.addEventListener('click', function () {
+    const clone = templateRow.cloneNode(true);
+    clone.removeAttribute('id');
+
+    // Replace __INDEX__ placeholder with current index
+    clone.innerHTML = clone.innerHTML.replace(/__INDEX__/g, String(nextIndex));
+
+    body.appendChild(clone);
+    nextIndex += 1;
+  });
+});
+</script>
+{% endblock %}

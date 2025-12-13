@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}Create Workspace – Sample Canvas{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-9">
+    <div class="card shadow-sm mb-3">
+      <div class="card-body p-4">
+        <h1 class="h4 mb-3">Arrange Sample Label</h1>
+        <p class="text-muted mb-3">
+          This is a simple base label template for your workspace. Drag fields around the canvas
+          and adjust sizes as needed. You can refine templates further later.
+        </p>
+
+        <form method="post">
+          {% csrf_token %}
+
+          <!-- WYSIWYG canvas -->
+          <div id="label-canvas"
+               class="border bg-white mb-3"
+               style="position: relative; height: 300px; overflow: auto;">
+            {% for item in layout %}
+              <div
+                class="border rounded bg-light p-1 small position-absolute field-block"
+                data-index="{{ forloop.counter0 }}"
+                style="
+                  left: {{ item.x }}px;
+                  top: {{ item.y }}px;
+                  width: {{ item.width }}px;
+                  height: {{ item.height }}px;
+                  cursor: move;
+                "
+              >
+                {{ item.name }}<br>
+                <span class="text-muted">{{ item.field_type }}</span>
+              </div>
+            {% endfor %}
+          </div>
+
+          <p class="text-muted small mb-2">
+            Drag the blocks on the canvas to change their position.
+            You can fine-tune X/Y and Width/Height below.
+          </p>
+
+          <!-- Numeric controls that will be submitted -->
+          <div class="table-responsive mb-3">
+            <table class="table table-sm align-middle">
+              <thead>
+                <tr>
+                  <th>Field</th>
+                  <th>X</th>
+                  <th>Y</th>
+                  <th>Width</th>
+                  <th>Height</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in layout %}
+                  <tr>
+                    <td>{{ item.name }}</td>
+                    <td>
+                      <input type="number" class="form-control form-control-sm"
+                             name="x_{{ forloop.counter0 }}" value="{{ item.x }}">
+                    </td>
+                    <td>
+                      <input type="number" class="form-control form-control-sm"
+                             name="y_{{ forloop.counter0 }}" value="{{ item.y }}">
+                    </td>
+                    <td>
+                      <input type="number" class="form-control form-control-sm"
+                             name="width_{{ forloop.counter0 }}" value="{{ item.width }}">
+                    </td>
+                    <td>
+                      <input type="number" class="form-control form-control-sm"
+                             name="height_{{ forloop.counter0 }}" value="{{ item.height }}">
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="d-flex justify-content-between">
+            <button type="submit" name="back" value="1" class="btn btn-link">← Back</button>
+            <button type="submit" class="btn btn-primary">
+              Create Workspace
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <a href="{% url 'workspace_list' %}" class="btn btn-link">
+      ← Back to Workspaces
+    </a>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const canvas = document.getElementById('label-canvas');
+  if (!canvas) return;
+
+  const blocks = canvas.querySelectorAll('.field-block');
+  let activeBlock = null;
+  let startX, startY, origLeft, origTop;
+
+  function getInputsForIndex(idx) {
+    const xInput = document.querySelector('input[name="x_' + idx + '"]');
+    const yInput = document.querySelector('input[name="y_' + idx + '"]');
+    return { xInput, yInput };
+  }
+
+  blocks.forEach(block => {
+    block.addEventListener('mousedown', function (e) {
+      if (e.button !== 0) return; // left click only
+      activeBlock = block;
+
+      startX = e.clientX;
+      startY = e.clientY;
+
+      // current left/top from inline style
+      origLeft = parseInt(block.style.left, 10) || 0;
+      origTop  = parseInt(block.style.top, 10) || 0;
+
+      document.body.classList.add('dragging');
+      e.preventDefault();
+    });
+  });
+
+  document.addEventListener('mousemove', function (e) {
+    if (!activeBlock) return;
+
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+
+    let newLeft = origLeft + dx;
+    let newTop  = origTop + dy;
+
+    // Constrain to canvas
+    const canvasRect = canvas.getBoundingClientRect();
+    const blockRect  = activeBlock.getBoundingClientRect();
+
+    const maxLeft = canvas.clientWidth - blockRect.width;
+    const maxTop  = canvas.clientHeight - blockRect.height;
+
+    if (newLeft < 0) newLeft = 0;
+    if (newTop  < 0) newTop  = 0;
+    if (newLeft > maxLeft) newLeft = maxLeft;
+    if (newTop  > maxTop)  newTop  = maxTop;
+
+    // Apply to block
+    activeBlock.style.left = newLeft + 'px';
+    activeBlock.style.top  = newTop + 'px';
+
+    // Sync into X/Y inputs so POST has updated values
+    const idx = activeBlock.dataset.index;
+    const { xInput, yInput } = getInputsForIndex(idx);
+    if (xInput) xInput.value = Math.round(newLeft);
+    if (yInput) yInput.value = Math.round(newTop);
+  });
+
+  document.addEventListener('mouseup', function () {
+    if (activeBlock) {
+      activeBlock = null;
+      document.body.classList.remove('dragging');
+    }
+  });
+});
+</script>
+{% endblock %}

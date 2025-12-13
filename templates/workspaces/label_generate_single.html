@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Single SKU Labels – {{ template.name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-9">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h1 class="h4 mb-1">Generate Labels (Single SKU)</h1>
+        <p class="text-muted small mb-0">
+          Workspace: {{ workspace.name }} · Template: {{ template.name }}
+        </p>
+      </div>
+      <a href="{% url 'label_generate_start' workspace.id %}"
+         class="btn btn-link btn-sm">← Back</a>
+    </div>
+
+    <form method="post" class="card shadow-sm">
+      {% csrf_token %}
+      <div class="card-body">
+
+        <h6 class="mb-2">Template Fields</h6>
+        <p class="text-muted small">
+          Fill values for all fields except Barcode / QR. Image fields expect an image URL.
+        </p>
+
+        <div class="row">
+          {% for f in input_fields %}
+          <div class="col-md-6 mb-3">
+            <label class="form-label small">
+              {{ f.name }} ({{ f.key }})
+              <span class="text-muted">
+                – {{ f.field_type }}
+              </span>
+            </label>
+            <input
+              type="text"
+              name="field_{{ f.key }}"
+              class="form-control form-control-sm"
+              value="{{ field_values.f.key }}"
+            />
+          </div>
+          {% endfor %}
+        </div>
+
+        <hr>
+
+        <h6 class="mb-2">Product Codes</h6>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label small">EAN Code <span class="text-danger">*</span></label>
+            <input type="text" name="ean_code"
+                   class="form-control form-control-sm"
+                   value="{{ ean_code }}">
+          </div>
+          <div class="col-md-6 mb-3">
+            <div class="form-check mt-4">
+              <input class="form-check-input" type="checkbox" id="hasGs1Check"
+                     name="has_gs1" {% if has_gs1 %}checked{% endif %}>
+              <label class="form-check-label small" for="hasGs1Check">
+                Do you have GS1 Codes?
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="row" id="gs1Row" {% if not has_gs1 %}style="display:none"{% endif %}>
+          <div class="col-md-6 mb-3">
+            <label class="form-label small">GS1 Code</label>
+            <input type="text" name="gs1_code"
+                   class="form-control form-control-sm"
+                   value="{{ gs1_code }}">
+          </div>
+        </div>
+
+        <hr>
+
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label class="form-label small">Quantity (max 500)</label>
+            <input type="number" name="quantity"
+                   class="form-control form-control-sm"
+                   min="1" max="500"
+                   value="{{ quantity }}">
+          </div>
+        </div>
+
+      </div>
+      <div class="card-footer d-flex justify-content-end">
+        <button type="submit" class="btn btn-primary">Generate</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const chk = document.getElementById("hasGs1Check");
+    const row = document.getElementById("gs1Row");
+    if (!chk || !row) return;
+    chk.addEventListener("change", function () {
+      row.style.display = this.checked ? "" : "none";
+    });
+  })();
+</script>
+{% endblock %}

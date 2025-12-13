@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Label Generation – {{ workspace.name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <h1 class="h4 mb-3">Generate Labels</h1>
+
+    <form method="post" class="card shadow-sm">
+      <div class="card-body">
+        {% csrf_token %}
+
+        <div class="mb-3">
+          <label class="form-label">Choose Template</label>
+          <select name="template_id" class="form-select">
+            <option value="">-- Select Template --</option>
+            {% for t in templates %}
+              <option value="{{ t.id }}">{{ t.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label d-block">Generation Mode</label>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="mode" id="modeSingle"
+                   value="SINGLE" checked>
+            <label class="form-check-label" for="modeSingle">
+              Single SKU
+            </label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="mode" id="modeMulti"
+                   value="MULTI" disabled>
+            <label class="form-check-label text-muted" for="modeMulti">
+              Multiple SKUs (coming soon)
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer d-flex justify-content-end">
+        <button type="submit" class="btn btn-primary">Next</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

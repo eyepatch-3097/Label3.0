@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Create Super Template{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <h1 class="h4 mb-3">Create Super Template</h1>
+        <p class="text-muted mb-3">
+          Define the basic details and size for this global template.
+          You’ll design the layout on the next screen.
+        </p>
+
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {{ form.non_field_errors }}
+
+          <div class="mb-3">
+            <label class="form-label">Template Name</label>
+            {{ form.name }}
+            {% if form.name.errors %}
+              <div class="text-danger small">{{ form.name.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            {{ form.description }}
+            {% if form.description.errors %}
+              <div class="text-danger small">{{ form.description.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Width (cm)</label>
+              {{ form.width_cm }}
+              {% if form.width_cm.errors %}
+                <div class="text-danger small">{{ form.width_cm.errors.0 }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Height (cm)</label>
+              {{ form.height_cm }}
+              {% if form.height_cm.errors %}
+                <div class="text-danger small">{{ form.height_cm.errors.0 }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">DPI</label>
+              {{ form.dpi }}
+              {% if form.dpi.errors %}
+                <div class="text-danger small">{{ form.dpi.errors.0 }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Category</label>
+              {{ form.category }}
+              {% if form.category.errors %}
+                <div class="text-danger small">{{ form.category.errors.0 }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Custom Category (if Other)</label>
+              {{ form.custom_category }}
+              {% if form.custom_category.errors %}
+                <div class="text-danger small">{{ form.custom_category.errors.0 }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between">
+            <a href="{% url 'global_template_list' %}" class="btn btn-link">
+              Cancel
+            </a>
+            <button type="submit" class="btn btn-primary">
+              Next: Design on Canvas
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+    

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}My Workspaces – {{ org.name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-10">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h1 class="h4 mb-0">My Workspaces</h1>
+      <a href="{% url 'dashboard' %}" class="btn btn-link btn-sm">← Back to Dashboard</a>
+    </div>
+
+    {% if workspaces %}
+      <div class="row row-cols-1 row-cols-md-2 g-3">
+        {% for ws in workspaces %}
+          <div class="col">
+            <div class="card shadow-sm h-100">
+              <div class="card-body d-flex flex-column">
+                <h2 class="h5 mb-1">
+                  <a href="{% url 'my_workspace_detail' ws.id %}" class="text-decoration-none">
+                    {{ ws.name }}
+                  </a>
+                </h2>
+                <p class="text-muted small mb-2">
+                  {{ ws.description|default:"No description provided." }}
+                </p>
+                <p class="text-muted small mb-3">
+                  Workspace ID:
+                  <code>{{ ws.workspace_code }}</code><br>
+                  Created at {{ ws.created_at }}
+                </p>
+
+                {% if not is_admin %}
+                  {# Optional: show their workspace role if we have it #}
+                  {% with m=membership_by_ws.ws.id %}
+                  {% endwith %}
+                {% endif %}
+
+                <div class="mt-auto">
+                  <a href="{% url 'my_workspace_detail' ws.id %}"
+                     class="btn btn-sm btn-outline-primary">
+                    Open Workspace
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="alert alert-info">
+        {% if is_admin %}
+          No workspaces found for your organisation yet.
+          <a href="{% url 'workspace_create_step1' %}">Create your first workspace</a>.
+        {% else %}
+          You don’t have access to any workspaces yet.
+          Please contact your organisation admin.
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

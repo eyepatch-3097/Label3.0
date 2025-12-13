@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Create Workspace – Map Fields{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <h1 class="h4 mb-3">Map Fields from Template File</h1>
+        <p class="text-muted mb-3">
+          We detected the following headers in your file. For each header you want to use in labels,
+          choose a field type. You can skip some headers.
+        </p>
+
+        {% if headers %}
+          <form method="post">
+            {% csrf_token %}
+
+            <div class="table-responsive mb-3">
+              <table class="table table-sm align-middle">
+                <thead>
+                  <tr>
+                    <th>File Header</th>
+                    <th>Field Type</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for h in headers %}
+                    <tr>
+                      <td>{{ h }}</td>
+                      <td>
+                        <select name="field_type_{{ forloop.counter0 }}" class="form-select form-select-sm">
+                          <option value="">-- Ignore --</option>
+                          <option value="TEXT">Text</option>
+                          <option value="IMAGE_URL">Image URL</option>
+                          <option value="PRICE">Price</option>
+                          <option value="SERIAL">Serial Number</option>
+                        </select>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+
+            <div class="d-flex justify-content-between">
+              <button type="submit" name="back" value="1" class="btn btn-link">← Back</button>
+              <button type="submit" class="btn btn-primary">Next</button>
+            </div>
+          </form>
+        {% else %}
+          <p class="text-muted">No headers found in file. You can define fields manually.</p>
+          <a href="{% url 'workspace_manual_fields' %}" class="btn btn-primary">Go to manual fields</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

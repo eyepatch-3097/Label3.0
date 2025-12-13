@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Org Join Requests – Labelcraft{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-10">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <h1 class="h4 mb-3">Organisation Join Requests</h1>
+        <p class="text-muted mb-4">
+          Organisation: <strong>{{ org.name }}</strong>
+        </p>
+
+        {% if pending_requests %}
+          <div class="table-responsive">
+            <table class="table table-striped align-middle">
+              <thead>
+                <tr>
+                  <th>Email</th>
+                  <th>Requested At</th>
+                  <th class="text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for jr in pending_requests %}
+                  <tr>
+                    <td>{{ jr.user.email }}</td>
+                    <td>{{ jr.created_at }}</td>
+                    <td class="text-end">
+                      <form method="post" action="{% url 'approve_org_join_request' jr.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-success">
+                          Approve
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="text-muted">No pending join requests right now.</p>
+        {% endif %}
+
+        <a href="{% url 'dashboard' %}" class="btn btn-link mt-3">
+          ← Back to dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

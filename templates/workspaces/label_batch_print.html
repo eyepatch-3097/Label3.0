@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Print Labels – {{ template.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="d-flex justify-content-between align-items-center my-3 no-print">
+    <h1 class="h5 mb-0">Print Labels – {{ template.name }}</h1>
+    <div>
+      <a
+        href="{% url 'label_generate_single_preview' workspace.id batch.id %}"
+        class="btn btn-outline-secondary btn-sm"
+      >
+        Back
+      </a>
+      <button class="btn btn-primary btn-sm" onclick="window.print()">
+        Print
+      </button>
+    </div>
+  </div>
+
+  {# Each label is rendered in its own box #}
+  {% for label in labels %}
+  <div class="print-label-wrapper mb-4">
+    <!-- Top row per label (not printed) -->
+    <div class="d-flex justify-content-between align-items-center mb-2 no-print">
+      <span class="text-muted small">Label #{{ label.index }}</span>
+      <button
+        type="button"
+        class="btn btn-sm btn-outline-secondary download-label-btn"
+        data-label-id="label-{{ label.index }}"
+      >
+        Download
+      </button>
+    </div>
+
+    <!-- The actual printable label area -->
+    <div
+      id="label-{{ label.index }}"
+      class="print-label border position-relative bg-white"
+      style="width: {{ canvas_width }}px; height: {{ canvas_height }}px; overflow: hidden;"
+    >
+      {% for item in label.layout %}
+      <div
+        class="position-absolute small"
+        style="left: {{ item.x }}px; top: {{ item.y }}px;
+               width: {{ item.width }}px; height: {{ item.height }}px;"
+      >
+        {% if item.field_type == 'IMAGE_URL' %}
+          {% if item.value %}
+            <img
+              src="{{ item.value }}"
+              alt="{{ item.name }}"
+              style="max-width: 100%; max-height: 100%; object-fit: contain;"
+            />
+          {% endif %}
+        {% elif item.field_type == 'BARCODE' or item.field_type == 'QRCODE' %}
+          {% if item.image_data_url %}
+            <img
+              src="{{ item.image_data_url }}"
+              alt="{{ item.name }}"
+              style="max-width: 100%; max-height: 100%; object-fit: contain;"
+            />
+          {% else %}
+            <span class="text-muted">{{ item.value }}</span>
+          {% endif %}
+        {% else %}
+          <div class="text-uppercase" style="font-size: 10px; margin-bottom: 2px;">
+            {{ item.name }}
+          </div>
+          <div>{{ item.value }}</div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<style>
+  /* Try hard to keep each label on a single printed page */
+  .print-label-wrapper,
+  .print-label {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    -webkit-region-break-inside: avoid;
+    -webkit-column-break-inside: avoid;
+  }
+
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+
+    .print-label-wrapper,
+    .print-label {
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+    }
+
+    body {
+      margin: 0;
+    }
+
+    /* Optional: control page margins for nicer fit */
+    @page {
+      margin: 10mm;
+    }
+  }
+</style>
+
+<!-- html2canvas for per-label download -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".download-label-btn").forEach((btn) => {
+      btn.addEventListener("click", function () {
+        const targetId = this.dataset.labelId;
+        const labelEl = document.getElementById(targetId);
+        if (!labelEl) return;
+
+        html2canvas(labelEl, {
+          scale: 2,      // higher scale ⇒ sharper png for printing
+          useCORS: true,
+        }).then((canvas) => {
+          const link = document.createElement("a");
+          link.download = targetId + ".png";
+          link.href = canvas.toDataURL("image/png");
+          link.click();
+        });
+      });
+    });
+  });
+</script>
+{% endblock %}

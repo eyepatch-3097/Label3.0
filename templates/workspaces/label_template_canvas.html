@@ -1,0 +1,396 @@
+{% extends "base.html" %} {% block title %}Design Template – {{ template.name
+}}{% endblock %} {% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-11">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h1 class="h4 mb-1">Design Template: {{ template.name }}</h1>
+        <p class="text-muted mb-0">
+          Workspace: <strong>{{ workspace.name }}</strong> ({{ org.name }}) ·
+          Size: {{ template.width_cm }} × {{ template.height_cm }} cm @ {{
+          template.dpi }} DPI
+        </p>
+      </div>
+      <a
+        href="{% url 'label_template_list' workspace.id %}"
+        class="btn btn-link btn-sm"
+      >
+        ← Back to Templates
+      </a>
+    </div>
+
+    <div class="row">
+      <!-- Variables panel -->
+      <div class="col-md-3 mb-3">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <h2 class="h6 mb-2">Variables</h2>
+            <p class="text-muted small">
+              Click “Add” to place a field on the canvas, then drag to position.
+            </p>
+
+            <ul class="list-group mb-3">
+              {% for f in workspace_fields %}
+              <li
+                class="list-group-item py-1 px-2 d-flex justify-content-between align-items-center"
+              >
+                <span class="small">{{ f.name }}</span>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-primary btn-add-field"
+                  data-name="{{ f.name }}"
+                  data-key="{{ f.key }}"
+                  data-field-type="{{ f.field_type }}"
+                  data-workspace-field-id="{{ f.id }}"
+                >
+                  Add
+                </button>
+              </li>
+              {% endfor %}
+            </ul>
+
+            <h2 class="h6 mb-2">Special Fields</h2>
+            <ul class="list-group mb-3">
+              <li
+                class="list-group-item py-1 px-2 d-flex justify-content-between align-items-center"
+              >
+                <span class="small">Barcode</span>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-primary btn-add-field"
+                  data-name="Barcode"
+                  data-key="barcode"
+                  data-field-type="{{ workspace_fields.model.FIELD_BARCODE }}"
+                  data-workspace-field-id=""
+                >
+                  Add
+                </button>
+              </li>
+              <li
+                class="list-group-item py-1 px-2 d-flex justify-content-between align-items-center"
+              >
+                <span class="small">QR Code</span>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-primary btn-add-field"
+                  data-name="QR Code"
+                  data-key="qrcode"
+                  data-field-type="{{ workspace_fields.model.FIELD_QR }}"
+                  data-workspace-field-id=""
+                >
+                  Add
+                </button>
+              </li>
+            </ul>
+
+            <h2 class="h6 mb-2">New Custom Field</h2>
+            <div class="mb-2">
+              <label class="form-label small mb-1">Field Name</label>
+              <input
+                type="text"
+                id="newFieldName"
+                class="form-control form-control-sm"
+              />
+            </div>
+            <div class="mb-2">
+              <label class="form-label small mb-1">Field Type</label>
+              <select id="newFieldType" class="form-select form-select-sm">
+                <option value="TEXT">Text</option>
+                <option value="IMAGE_URL">Image URL</option>
+                <option value="PRICE">Price</option>
+                <option value="SERIAL">Serial Number</option>
+                <option value="BARCODE">Barcode</option>
+                <option value="QRCODE">QR Code</option>
+              </select>
+            </div>
+            <button
+              type="button"
+              id="btnAddCustomField"
+              class="btn btn-sm btn-success"
+            >
+              Add Custom Field
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Canvas -->
+      <div class="col-md-9 mb-3">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h2 class="h6 mb-2">Canvas</h2>
+            <p class="text-muted small">
+              Drag fields to position them. Click ✕ to remove a field from this
+              canvas (it will remain available in the list).
+            </p>
+
+            <form method="post" id="canvasForm">
+              {% csrf_token %}
+              <div
+                id="labelCanvas"
+                class="border position-relative bg-light"
+                style="width: {{ canvas_width }}px; height: {{ canvas_height }}px; overflow: hidden;"
+              ></div>
+
+              <!-- Selected field size controls -->
+              <div class="row mt-3">
+                <div class="col-md-3">
+                  <label class="form-label small">Selected Width (px)</label>
+                  <input
+                    type="number"
+                    id="selectedWidth"
+                    class="form-control form-control-sm"
+                  />
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label small">Selected Height (px)</label>
+                  <input
+                    type="number"
+                    id="selectedHeight"
+                    class="form-control form-control-sm"
+                  />
+                </div>
+                <div class="col-md-6">
+                  <p class="small text-muted mt-4" id="selectedFieldLabel">
+                    No field selected.
+                  </p>
+                </div>
+              </div>
+
+              <input type="hidden" name="layout_data" id="layoutData" />
+
+              <div class="d-flex justify-content-end gap-2 mt-3">
+                <a
+                  href="{% url 'label_template_list' workspace.id %}"
+                  class="btn btn-outline-secondary"
+                >
+                  Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                  Save &amp; Preview
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const canvas = document.getElementById("labelCanvas");
+    const layoutInput = document.getElementById("layoutData");
+    const existingLayout = {{ existing_layout|safe }};
+
+    const widthInput = document.getElementById("selectedWidth");
+    const heightInput = document.getElementById("selectedHeight");
+    const selectedLabel = document.getElementById("selectedFieldLabel");
+
+    let selectedBox = null;
+
+    function selectBox(box) {
+      if (selectedBox && selectedBox !== box) {
+        selectedBox.classList.remove("border-primary");
+      }
+      selectedBox = box;
+      if (selectedBox) {
+        selectedBox.classList.add("border-primary");
+        widthInput.value = selectedBox.offsetWidth;
+        heightInput.value = selectedBox.offsetHeight;
+        selectedLabel.textContent = "Editing: " + selectedBox.dataset.name + " (" + selectedBox.dataset.key + ")";
+      } else {
+        widthInput.value = "";
+        heightInput.value = "";
+        selectedLabel.textContent = "No field selected.";
+      }
+    }
+
+    function createFieldBox(field) {
+      const box = document.createElement("div");
+      box.className = "field-box border bg-white px-2 py-1 small position-absolute";
+      box.style.left = (field.x || 10) + "px";
+      box.style.top = (field.y || 10) + "px";
+      box.style.width = (field.width || 140) + "px";
+      box.style.height = (field.height || 32) + "px";
+      box.dataset.name = field.name;
+      box.dataset.key = field.key;
+      box.dataset.fieldType = field.field_type;
+      box.dataset.workspaceFieldId = field.workspace_field_id || "";
+
+      box.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center h-100">
+          <span>${field.name}</span>
+          <button type="button" class="btn btn-sm btn-link text-danger p-0 ms-2 btn-remove-field">&times;</button>
+        </div>
+      `;
+
+      box.addEventListener("click", function (e) {
+        if (e.target.classList.contains("btn-remove-field")) return;
+        selectBox(box);
+      });
+
+      makeDraggable(box);
+      canvas.appendChild(box);
+    }
+
+    function makeDraggable(el) {
+      let isDown = false;
+      let offset = [0, 0];
+
+      el.addEventListener("mousedown", function (e) {
+        if (e.target.classList.contains("btn-remove-field")) {
+          return;
+        }
+        isDown = true;
+        offset = [el.offsetLeft - e.clientX, el.offsetTop - e.clientY];
+        selectBox(el);
+      });
+
+      document.addEventListener("mouseup", function () {
+        isDown = false;
+      });
+
+      document.addEventListener("mousemove", function (e) {
+        if (!isDown) return;
+        e.preventDefault();
+
+        let x = e.clientX + offset[0];
+        let y = e.clientY + offset[1];
+
+        const rect = canvas.getBoundingClientRect();
+        const maxX = rect.width - el.offsetWidth;
+        const maxY = rect.height - el.offsetHeight;
+
+        x = Math.max(0, Math.min(x, maxX));
+        y = Math.max(0, Math.min(y, maxY));
+
+        el.style.left = x + "px";
+        el.style.top = y + "px";
+      });
+    }
+
+    // Load existing layout (for future edits)
+    try {
+      if (Array.isArray(existingLayout)) {
+        existingLayout.forEach(createFieldBox);
+      }
+    } catch (e) {
+      // ignore
+    }
+
+    // Add workspace / special fields
+    // Add workspace / special fields
+  document.querySelectorAll(".btn-add-field").forEach((btn) => {
+    btn.addEventListener("click", function () {
+      const fieldType = this.dataset.fieldType || "";
+      const key = this.dataset.key || "";
+
+      // Default size for normal text fields
+      let width = 140;
+      let height = 32;
+
+      // Special defaults for barcode & QR
+      if (key === "barcode" || fieldType === "BARCODE") {
+        width = 250;
+        height = 60;
+      } else if (key === "qrcode" || fieldType === "QRCODE") {
+        width = 100;
+        height = 100;
+      }
+
+      const field = {
+        name: this.dataset.name,
+        key: key,
+        field_type: fieldType,
+        workspace_field_id: this.dataset.workspaceFieldId || null,
+        x: 10,
+        y: 10,
+        width: width,
+        height: height,
+      };
+      createFieldBox(field);
+    });
+  });
+
+    // Add custom field
+    const customNameInput = document.getElementById("newFieldName");
+    const customTypeSelect = document.getElementById("newFieldType");
+
+    document.getElementById("btnAddCustomField").addEventListener("click", function () {
+      const name = customNameInput.value.trim();
+      const fieldType = customTypeSelect.value;
+      if (!name) {
+        alert("Please enter a field name");
+        return;
+      }
+      const key = name.toLowerCase().replace(/\s+/g, "_");
+      const field = {
+        name: name,
+        key: key,
+        field_type: fieldType,
+        workspace_field_id: null,
+        x: 10,
+        y: 10,
+        width: 140,
+        height: 32,
+      };
+      createFieldBox(field);
+      customNameInput.value = "";
+    });
+
+    // Remove field from canvas
+    canvas.addEventListener("click", function (e) {
+      if (e.target.classList.contains("btn-remove-field")) {
+        const box = e.target.closest(".field-box");
+        if (!box) return;
+        const isSelected = (box === selectedBox);
+        box.remove();
+        if (isSelected) {
+          selectBox(null);
+        }
+      }
+    });
+
+    // Resize selected box from inputs
+    function applySizeInputs() {
+      if (!selectedBox) return;
+      let w = parseInt(widthInput.value, 10);
+      let h = parseInt(heightInput.value, 10);
+      if (!w || w < 10) w = selectedBox.offsetWidth;
+      if (!h || h < 10) h = selectedBox.offsetHeight;
+      selectedBox.style.width = w + "px";
+      selectedBox.style.height = h + "px";
+    }
+
+    widthInput.addEventListener("change", applySizeInputs);
+    heightInput.addEventListener("change", applySizeInputs);
+
+    // Serialize layout before submit
+    document.getElementById("canvasForm").addEventListener("submit", function (e) {
+      const boxes = canvas.querySelectorAll(".field-box");
+      if (!boxes.length) {
+        if (!confirm("No fields on the canvas. Continue anyway?")) {
+          e.preventDefault();
+          return;
+        }
+      }
+      const layout = [];
+      boxes.forEach((box) => {
+        layout.push({
+          name: box.dataset.name,
+          key: box.dataset.key,
+          field_type: box.dataset.fieldType,
+          workspace_field_id: box.dataset.workspaceFieldId || null,
+          x: box.offsetLeft,
+          y: box.offsetTop,
+          width: box.offsetWidth,
+          height: box.offsetHeight,
+        });
+      });
+      layoutInput.value = JSON.stringify(layout);
+    });
+  })();
+</script>
+{% endblock %}

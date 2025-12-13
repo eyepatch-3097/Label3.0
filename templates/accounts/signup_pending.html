@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Pending Approval – Labelcraft{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <h1 class="h4 mb-3 text-center">Organisation already exists</h1>
+
+        <p class="mb-2 text-center">
+          Your organisation <strong>{{ org.name }}</strong> is already using Labelcraft.
+        </p>
+        <p class="text-muted text-center mb-4">
+          We've created your account (<strong>{{ email }}</strong>)
+          and sent a request to the admin for approval.
+          You can use Labelcraft once your admin approves your access.
+        </p>
+
+        <div class="d-grid">
+          <a class="btn btn-outline-primary" href="{% url 'login' %}">
+            Back to Login
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

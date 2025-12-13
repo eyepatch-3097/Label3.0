@@ -1,0 +1,127 @@
+{% extends "base.html" %} {% block title %}Preview Template – {{ template.name
+}}{% endblock %} {% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-10">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h1 class="h4 mb-1">Preview Template: {{ template.name }}</h1>
+        <p class="text-muted mb-0">
+          Workspace: <strong>{{ workspace.name }}</strong> ({{ org.name }})
+        </p>
+      </div>
+      <a
+        href="{% url 'label_template_canvas' template.id %}"
+        class="btn btn-link btn-sm"
+      >
+        ← Back to Canvas
+      </a>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <h2 class="h6 mb-3">Sample Values</h2>
+        <form method="post">
+          {% csrf_token %}
+
+          <div class="row g-3">
+            {% for item in layout %}
+            <div class="col-md-6">
+              <label class="form-label small">
+                {{ item.name }} ({{ item.key }})
+              </label>
+
+              {% if item.field_type == "IMAGE_URL" %}
+              <input
+                type="text"
+                name="sample_{{ item.key }}"
+                value="{{ item.value }}"
+                class="form-control form-control-sm {% if item.error %}is-invalid{% endif %}"
+                placeholder="https://example.com/image.jpg"
+              />
+              {% else %}
+              <input
+                type="text"
+                name="sample_{{ item.key }}"
+                value="{{ item.value }}"
+                class="form-control form-control-sm {% if item.error %}is-invalid{% endif %}"
+              />
+              {% endif %} {% if item.error %}
+              <div class="invalid-feedback d-block">{{ item.error }}</div>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 mt-3">
+            <button
+              type="submit"
+              name="action"
+              value="preview"
+              class="btn btn-outline-primary"
+            >
+              Update Preview
+            </button>
+            <button
+              type="submit"
+              name="action"
+              value="save"
+              class="btn btn-primary"
+            >
+              Save Template
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h6 mb-3">Label Preview</h2>
+        <div
+          class="border bg-light position-relative"
+          style="width: {{ canvas_width }}px; height: {{ canvas_height }}px; overflow: hidden;"
+        >
+          {% for item in layout %}
+          <div
+            class="position-absolute border bg-white p-1 small"
+            style="
+    left: {{ item.x }}px;
+    top: {{ item.y }}px;
+    width: {{ item.width }}px;
+    min-height: {{ item.height }}px;
+    overflow: visible;
+    white-space: normal;
+    word-wrap: break-word;
+  "
+          >
+            <div class="text-muted small">{{ item.name }}</div>
+
+            {% if item.field_type == "IMAGE_URL" %} {% if item.value %}
+            <div class="mt-1 text-center">
+              <img
+                src="{{ item.value }}"
+                alt="{{ item.name }}"
+                style="max-width: 100%; max-height: 80%; object-fit: contain"
+              />
+            </div>
+            {% else %}
+            <div class="text-muted small mt-1">(no image URL)</div>
+            {% endif %} {% elif item.field_type == "BARCODE" %}
+            <div class="text-muted small mt-1">
+              [Barcode preview placeholder]
+            </div>
+            {% elif item.field_type == "QRCODE" %}
+            <div class="text-muted small mt-1">
+              [QR code preview placeholder]
+            </div>
+            {% else %}
+            <div class="mt-1">{{ item.value|default:"(no value)" }}</div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
