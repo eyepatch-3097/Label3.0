@@ -1,3 +1,31 @@
+
+# LabelCraft
+
+**Design, generate, and print product labels—fast.**  
+Labelcraft is a lightweight, workflow-first label system built for retail/D2C teams who want **pixel-perfect templates**, **batch-ready generation**, and **print-friendly output**—without wrestling spreadsheets or design tools.
+
+
+## Libraries Used
+
+ - [Python Barcode Library](https://python-barcode.readthedocs.io/en/stable/)
+ - [QR Code Library](https://github.com/lincolnloop/python-qrcode)
+
+
+## Deployment
+
+To deploy this project run
+
+```bash
+  python -m venv venv
+  .venv\Scripts\Activate
+  pip install -r requirements.txt
+  python manage.py makemigrations
+  python manage.py migrate
+  python manage.py runserver
+```
+
+Or you can check out our existing production deploy at: [Labelcraft](labelcraftdeploy.onrender.com)
+
 ## What Labelcraft does
 
 ### 1) Template Designer (Canvas-Based)
@@ -72,3 +100,11 @@ Labelcraft renders labels using:
   - **Barcode/QR render images only**
   - **Static Text renders only static content**
   - **Normal fields render label + value using consistent style rules**
+ 
+## Roadmap
+
+- Additional formatting options
+- Global History for ADMIN
+- AI Chatbot for Guided Agentic Labelling
+- Better Managed Access Control
+- UI/UX Optimizations
