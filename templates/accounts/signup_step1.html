@@ -3,21 +3,213 @@
 {% block title %}Sign up – Labelcraft{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-lg-6">
-    <div class="card shadow-sm">
-      <div class="card-body p-4">
-        <h1 class="h4 mb-3 text-center">Create your Labelcraft account</h1>
+<style>
+  /* --- Global & Layout --- */
+  body {
+    font-family: 'Inter', 'Roboto', sans-serif;
+    background-color: #F2F7FF;
+    overflow-x: hidden;
+  }
+
+  .split-screen-container {
+    min-height: 100vh;
+  }
+
+  /* --- Left Hero Section (Sign Up Variant) --- */
+  .hero-panel {
+    background: linear-gradient(135deg, #004080 0%, #6A70FF 100%);
+    color: #FFFFFF;
+    padding: 4rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Decorative circle pattern */
+  .hero-panel::before {
+      content: '';
+      position: absolute;
+      top: -50px; right: -50px;
+      width: 300px; height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      pointer-events: none;
+  }
+
+  .hero-heading {
+    font-weight: 800;
+    font-size: 2.5rem;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+  }
+
+  .hero-subtext {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 3rem;
+    max-width: 500px;
+  }
+
+  /* Benefits List */
+  .benefit-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.2rem;
+    font-size: 1.05rem;
+    font-weight: 500;
+  }
+
+  .check-icon {
+    width: 24px;
+    height: 24px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  /* --- Right Form Section --- */
+  .form-panel {
+    background-color: #F2F7FF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .signup-card {
+    width: 100%;
+    max-width: 480px; /* Slightly wider for comfortable typing */
+    padding: 2.5rem;
+    background-color: #FFFFFF;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(106, 112, 255, 0.08);
+    border: 1px solid #E5E7EB;
+  }
+
+  .brand-heading-form {
+    color: #004080;
+    font-weight: 700;
+  }
+
+  /* Input Styling */
+  .form-control, input[type="text"], input[type="email"], input[type="password"] {
+    display: block;
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    font-size: 1rem;
+    color: #212529;
+    background-color: #fff;
+    border: 1px solid #D1D5DB;
+    border-radius: 6px;
+    height: 46px;
+    transition: all 0.15s ease-in-out;
+  }
+
+  .form-control:focus, input:focus {
+    border-color: #6A70FF;
+    outline: 0;
+    box-shadow: 0 0 0 3px rgba(106, 112, 255, 0.2); /* Lavender Ring */
+  }
+
+  .form-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #004080;
+    margin-bottom: 0.4rem;
+  }
+
+  .btn-labelcraft {
+    background-color: #6A70FF;
+    border-color: #6A70FF;
+    color: #FFFFFF;
+    font-weight: 600;
+    padding: 12px 20px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+  }
+
+  .btn-labelcraft:hover {
+    background-color: #565CFF;
+    border-color: #565CFF;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(106, 112, 255, 0.3);
+  }
+
+  .auth-link { color: #6A70FF; font-weight: 600; text-decoration: none; }
+  .auth-link:hover { color: #004080; text-decoration: underline; }
+
+  /* Responsive */
+  @media (max-width: 991.98px) {
+    .hero-panel { padding: 3rem 2rem; }
+    .form-panel { padding: 2rem 1rem; }
+    .split-screen-container { min-height: auto; }
+  }
+</style>
+
+<div class="container-fluid p-0 overflow-hidden">
+  <div class="row g-0 split-screen-container">
+    
+    <div class="col-lg-7 hero-panel order-2 order-lg-1">
+      <div class="ps-lg-5 pe-lg-5">
+        <h1 class="hero-heading">Join the new standard in retail labelling.</h1>
+        <p class="hero-subtext">
+            Start designing professional, compliant labels today. No design skills required.
+        </p>
+
+        <div class="mt-4">
+            <div class="benefit-item">
+                <div class="check-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <span>Unlimited Single SKU Labels</span>
+            </div>
+            <div class="benefit-item">
+                <div class="check-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <span>Bulk Generator Access</span>
+            </div>
+            <div class="benefit-item">
+                <div class="check-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <span>Team Collaboration Features</span>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5 form-panel order-1 order-lg-2">
+      <div class="signup-card">
+        
+        <div class="text-center mb-4">
+             <h2 style="color: #6A70FF; font-weight: 800; letter-spacing: -0.5px; font-size: 1.5rem; margin-bottom: 1rem;">Labelcraft</h2>
+             <h1 class="h4 brand-heading-form">Create your account</h1>
+             <p class="text-muted small">Enter your details to get started.</p>
+        </div>
 
         <form method="post" novalidate>
           {% csrf_token %}
           {{ form.non_field_errors }}
 
           <div class="mb-3">
-            <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+            <label for="{{ form.email.id_for_label }}" class="form-label">Email Address</label>
             {{ form.email }}
             {% if form.email.errors %}
-              <div class="text-danger small">
+              <div class="text-danger small mt-1">
                 {{ form.email.errors|striptags }}
               </div>
             {% endif %}
@@ -27,33 +219,34 @@
             <label for="{{ form.password1.id_for_label }}" class="form-label">Password</label>
             {{ form.password1 }}
             {% if form.password1.errors %}
-              <div class="text-danger small">
+              <div class="text-danger small mt-1">
                 {{ form.password1.errors|striptags }}
               </div>
             {% endif %}
           </div>
 
-          <div class="mb-3">
+          <div class="mb-4">
             <label for="{{ form.password2.id_for_label }}" class="form-label">Confirm Password</label>
             {{ form.password2 }}
             {% if form.password2.errors %}
-              <div class="text-danger small">
+              <div class="text-danger small mt-1">
                 {{ form.password2.errors|striptags }}
               </div>
             {% endif %}
           </div>
 
-          <button type="submit" class="btn btn-primary w-100">
+          <button type="submit" class="btn btn-labelcraft w-100 shadow-sm">
             Continue
           </button>
         </form>
 
-        <p class="mt-3 text-center">
+        <p class="mt-4 text-center text-muted small">
           Already have an account?
-          <a href="{% url 'login' %}">Login</a>
+          <a href="{% url 'login' %}" class="auth-link">Log in</a>
         </p>
       </div>
     </div>
+
   </div>
 </div>
 {% endblock %}
